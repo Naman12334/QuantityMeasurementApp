@@ -43,6 +43,10 @@ public class Length {
 
         double baseValue = toBaseUnit();
         double converted = baseValue / targetUnit.getConversionFactor();
+
+        // rounding (good practice)
+        converted = Math.round(converted * 100.0) / 100.0;
+
         return new Length(converted, targetUnit);
     }
 
@@ -62,6 +66,9 @@ public class Length {
 
         double baseSum = this.toBaseUnit() + other.toBaseUnit();
         double resultValue = baseSum / this.unit.getConversionFactor();
+
+        // 🔥 FIX: rounding
+        resultValue = Math.round(resultValue * 100.0) / 100.0;
 
         return new Length(resultValue, this.unit);
     }

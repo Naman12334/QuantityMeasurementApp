@@ -28,4 +28,10 @@ public enum WeightUnit implements IMeasurable {
     public double convertFromBaseUnit(double baseValue) {
         return baseValue / conversionFactor;
     }
+
+    // ✅ ADD THIS METHOD (VERY IMPORTANT)
+    @Override
+    public String getUnitName() {
+        return this.name();
+    }
 }

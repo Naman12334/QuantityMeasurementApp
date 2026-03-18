@@ -43,6 +43,10 @@ public class Length {
 
         double baseValue = toBaseUnit();
         double converted = baseValue / targetUnit.getConversionFactor();
+
+        // ✅ rounding
+        converted = Math.round(converted * 1000.0) / 1000.0;
+
         return new Length(converted, targetUnit);
     }
 
@@ -56,6 +60,7 @@ public class Length {
         return baseValue / target.getConversionFactor();
     }
 
+    // ✅ UC6 method
     public Length add(Length other) {
         if (other == null)
             throw new IllegalArgumentException("Length cannot be null");
@@ -63,8 +68,13 @@ public class Length {
         double baseSum = this.toBaseUnit() + other.toBaseUnit();
         double resultValue = baseSum / this.unit.getConversionFactor();
 
+        // ✅ rounding
+        resultValue = Math.round(resultValue * 100.0) / 100.0;
+
         return new Length(resultValue, this.unit);
     }
+
+    // ✅ UC7 method
     public Length add(Length other, LengthUnit targetUnit) {
 
         if (other == null)
@@ -75,6 +85,9 @@ public class Length {
 
         double baseSum = this.toBaseUnit() + other.toBaseUnit();
         double resultValue = baseSum / targetUnit.getConversionFactor();
+
+        // ✅ rounding (more precision for UC7)
+        resultValue = Math.round(resultValue * 1000.0) / 1000.0;
 
         return new Length(resultValue, targetUnit);
     }

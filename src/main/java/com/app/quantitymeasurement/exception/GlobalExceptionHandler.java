@@ -1,18 +1,22 @@
 package com.app.quantitymeasurement.exception;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(QuantityMeasurementException.class)
-    public ResponseEntity<String> handleCustomException(QuantityMeasurementException ex){
-        return ResponseEntity.badRequest().body(ex.getMessage());
-    }
+    // 🔴 Handle login errors properly
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGeneralException(Exception ex){
-        return ResponseEntity.internalServerError().body("Something went wrong");
+        // If it's login error → return 401
+        if (ex.getMessage().equals("Invalid email or password")) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+
+        // Other errors → 500
+        return new ResponseEntity<>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

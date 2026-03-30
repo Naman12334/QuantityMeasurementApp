@@ -19,22 +19,22 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
     // 🔹 Convert DTO → Quantity Model
     private Quantity convertDTOToQuantity(QuantityDTO dto){
 
-        String unitName=dto.getUnit();
-        double value=dto.getValue();
+        String unitName = dto.getUnit();
+        double value = dto.getValue();
 
         switch(dto.getMeasurementType().toUpperCase()){
 
             case "LENGTH":
-                return new Quantity(value,LengthUnit.valueOf(unitName));
+                return new Quantity(value, LengthUnit.valueOf(unitName));
 
             case "WEIGHT":
-                return new Quantity(value,WeightUnit.valueOf(unitName));
+                return new Quantity(value, WeightUnit.valueOf(unitName));
 
             case "VOLUME":
-                return new Quantity(value,VolumeUnit.valueOf(unitName));
+                return new Quantity(value, VolumeUnit.valueOf(unitName));
 
             case "TEMPERATURE":
-                return new Quantity(value,TemperatureUnit.valueOf(unitName));
+                return new Quantity(value, TemperatureUnit.valueOf(unitName));
 
             default:
                 throw new QuantityMeasurementException("Invalid measurement type");
@@ -58,148 +58,122 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
 
     // 🔥 COMPARE
     @Override
-    public boolean compare(QuantityDTO q1,QuantityDTO q2){
+    public boolean compare(QuantityDTO q1, QuantityDTO q2, String email){
 
-        try{
+        Quantity quantity1 = convertDTOToQuantity(q1);
+        Quantity quantity2 = convertDTOToQuantity(q2);
 
-            Quantity quantity1=convertDTOToQuantity(q1);
-            Quantity quantity2=convertDTOToQuantity(q2);
+        boolean result = quantity1.equals(quantity2);
 
-            if(!q1.getMeasurementType().equalsIgnoreCase(q2.getMeasurementType())){
-                throw new QuantityMeasurementException("Different measurement types");
-            }
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity(
+                quantity1.toString(),
+                quantity2.toString(),
+                "COMPARE",
+                String.valueOf(result)
+        );
+        entity.setUserEmail(email);
+        repository.save(entity);
 
-            boolean result=quantity1.equals(quantity2);
-
-            // ✅ SAVE TO DB
-            repository.save(new QuantityMeasurementEntity(
-                    quantity1.toString(),
-                    quantity2.toString(),
-                    "COMPARE",
-                    String.valueOf(result)
-            ));
-
-            return result;
-
-        }catch(Exception e){
-            throw new QuantityMeasurementException(e.getMessage());
-        }
+        return result;
     }
 
     // 🔥 CONVERT
     @Override
-    public QuantityDTO convert(QuantityDTO source,String targetUnit){
+    public QuantityDTO convert(QuantityDTO source, String targetUnit, String email){
 
-        try{
+        Quantity quantity = convertDTOToQuantity(source);
 
-            Quantity quantity=convertDTOToQuantity(source);
+        IMeasurable unit = (IMeasurable) Enum.valueOf(
+                (Class<? extends Enum>) quantity.getUnit().getClass(),
+                targetUnit
+        );
 
-            IMeasurable unit=(IMeasurable)Enum.valueOf(
-                    (Class<? extends Enum>)quantity.getUnit().getClass(),
-                    targetUnit
-            );
+        Quantity result = quantity.convertTo(unit);
 
-            Quantity result=quantity.convertTo(unit);
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity(
+                quantity.toString(),
+                targetUnit,
+                "CONVERT",
+                result.toString()
+        );
+        entity.setUserEmail(email);
+        repository.save(entity);
 
-            // ✅ SAVE TO DB
-            repository.save(new QuantityMeasurementEntity(
-                    quantity.toString(),
-                    targetUnit,
-                    "CONVERT",
-                    result.toString()
-            ));
-
-            return convertQuantityToDTO(result);
-
-        }catch(Exception e){
-            throw new QuantityMeasurementException(e.getMessage());
-        }
+        return convertQuantityToDTO(result);
     }
 
     // 🔥 ADD
     @Override
-    public QuantityDTO add(QuantityDTO q1,QuantityDTO q2){
+    public QuantityDTO add(QuantityDTO q1, QuantityDTO q2, String email){
 
-        try{
+        Quantity quantity1 = convertDTOToQuantity(q1);
+        Quantity quantity2 = convertDTOToQuantity(q2);
 
-            Quantity quantity1=convertDTOToQuantity(q1);
-            Quantity quantity2=convertDTOToQuantity(q2);
+        Quantity result = quantity1.add(quantity2);
 
-            Quantity result=quantity1.add(quantity2);
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity(
+                quantity1.toString(),
+                quantity2.toString(),
+                "ADD",
+                result.toString()
+        );
+        entity.setUserEmail(email);
+        repository.save(entity);
 
-            // ✅ SAVE TO DB
-            repository.save(new QuantityMeasurementEntity(
-                    quantity1.toString(),
-                    quantity2.toString(),
-                    "ADD",
-                    result.toString()
-            ));
-
-            return convertQuantityToDTO(result);
-
-        }catch(Exception e){
-            throw new QuantityMeasurementException(e.getMessage());
-        }
+        return convertQuantityToDTO(result);
     }
 
     // 🔥 SUBTRACT
     @Override
-    public QuantityDTO subtract(QuantityDTO q1,QuantityDTO q2){
+    public QuantityDTO subtract(QuantityDTO q1, QuantityDTO q2, String email){
 
-        try{
+        Quantity quantity1 = convertDTOToQuantity(q1);
+        Quantity quantity2 = convertDTOToQuantity(q2);
 
-            Quantity quantity1=convertDTOToQuantity(q1);
-            Quantity quantity2=convertDTOToQuantity(q2);
+        Quantity result = quantity1.subtract(quantity2);
 
-            Quantity result=quantity1.subtract(quantity2);
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity(
+                quantity1.toString(),
+                quantity2.toString(),
+                "SUBTRACT",
+                result.toString()
+        );
+        entity.setUserEmail(email);
+        repository.save(entity);
 
-            // ✅ SAVE TO DB
-            repository.save(new QuantityMeasurementEntity(
-                    quantity1.toString(),
-                    quantity2.toString(),
-                    "SUBTRACT",
-                    result.toString()
-            ));
-
-            return convertQuantityToDTO(result);
-
-        }catch(Exception e){
-            throw new QuantityMeasurementException(e.getMessage());
-        }
+        return convertQuantityToDTO(result);
     }
 
     // 🔥 DIVIDE
     @Override
-    public double divide(QuantityDTO q1,QuantityDTO q2){
+    public double divide(QuantityDTO q1, QuantityDTO q2, String email){
 
-        try{
+        Quantity quantity1 = convertDTOToQuantity(q1);
+        Quantity quantity2 = convertDTOToQuantity(q2);
 
-            Quantity quantity1=convertDTOToQuantity(q1);
-            Quantity quantity2=convertDTOToQuantity(q2);
+        double result = quantity1.divide(quantity2);
 
-            double result=quantity1.divide(quantity2);
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity(
+                quantity1.toString(),
+                quantity2.toString(),
+                "DIVIDE",
+                String.valueOf(result)
+        );
+        entity.setUserEmail(email);
+        repository.save(entity);
 
-            // ✅ SAVE TO DB
-            repository.save(new QuantityMeasurementEntity(
-                    quantity1.toString(),
-                    quantity2.toString(),
-                    "DIVIDE",
-                    String.valueOf(result)
-            ));
-
-            return result;
-
-        }catch(Exception e){
-            throw new QuantityMeasurementException(e.getMessage());
-        }
-    }
-    @Override
-    public List<QuantityMeasurementEntity> getHistory(String operation){
-        return repository.findByOperation(operation);
+        return result;
     }
 
+    // 🔥 HISTORY
     @Override
-    public long getCount(String operation){
-        return repository.countByOperation(operation);
+    public List<QuantityMeasurementEntity> getHistory(String operation, String email){
+        return repository.findByOperationAndUserEmail(operation, email);
+    }
+
+    // 🔥 COUNT
+    @Override
+    public long getCount(String operation, String email){
+        return repository.countByOperationAndUserEmail(operation, email);
     }
 }

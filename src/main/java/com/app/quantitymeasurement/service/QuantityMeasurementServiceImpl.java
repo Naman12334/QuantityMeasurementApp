@@ -171,6 +171,16 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
         return repository.findByOperationAndUserEmail(operation, email);
     }
 
+    @Override
+    public List<QuantityMeasurementEntity> getAllHistory(String email){
+        return repository.findByUserEmail(email);
+    }
+
+    @Override
+    public List<QuantityMeasurementEntity> getErroredHistory(String email){
+        return repository.findByErrorTrueAndUserEmail(email);
+    }
+
     // 🔥 COUNT
     @Override
     public long getCount(String operation, String email){

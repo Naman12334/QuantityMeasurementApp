@@ -4,19 +4,30 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 🔴 Handle login errors properly
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+
+        String message = ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred.";
 
         // If it's login error → return 401
-        if (ex.getMessage().equals("Invalid email or password")) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        if ("Invalid email or password".equals(message)) {
+            return new ResponseEntity<>(Map.of("message", message), HttpStatus.UNAUTHORIZED);
+        }
+
+        // Handle specific measurement errors
+        if (ex instanceof QuantityMeasurementException || 
+            ex instanceof UnsupportedOperationException || 
+            ex instanceof ArithmeticException ||
+            ex instanceof IllegalArgumentException) {
+            return new ResponseEntity<>(Map.of("message", message), HttpStatus.BAD_REQUEST);
         }
 
         // Other errors → 500
-        return new ResponseEntity<>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(Map.of("message", message), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

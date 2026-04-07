@@ -67,6 +67,22 @@ public class QuantityMeasurementController {
     }
 
     // 🔥 HISTORY (USER-SPECIFIC)
+    @GetMapping("/history")
+    public List<QuantityMeasurementEntity> getAllHistory(HttpServletRequest request){
+
+        String email = (String) request.getAttribute("userEmail");
+
+        return service.getAllHistory(email);
+    }
+
+    @GetMapping("/history/errored")
+    public List<QuantityMeasurementEntity> getErroredHistory(HttpServletRequest request){
+
+        String email = (String) request.getAttribute("userEmail");
+
+        return service.getErroredHistory(email);
+    }
+
     @GetMapping("/history/{operation}")
     public List<QuantityMeasurementEntity> getHistory(@PathVariable String operation,
                                                       HttpServletRequest request){

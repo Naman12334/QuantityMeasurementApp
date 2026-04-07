@@ -18,7 +18,6 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
-    // ✅ ADD THIS
     @Autowired
     private CustomOAuth2SuccessHandler successHandler;
 
@@ -26,7 +25,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+            // ❌ disable csrf for APIs
             .csrf(csrf -> csrf.disable())
+
+            // ❌ disable default login form (important)
+            .formLogin(form -> form.disable())
+
+            // ❌ disable http basic
+            .httpBasic(basic -> basic.disable())
 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
@@ -35,20 +41,26 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/h2-console/**",
 
-                    // ✅ GOOGLE LOGIN PATHS
+                    // ✅ OAuth endpoints
                     "/oauth2/**",
-                    "/login/**"
+                    "/login/**",
+
+                    // ✅ allow your APIs for frontend (optional)
+                    "/api/**"
                 ).permitAll()
+
                 .anyRequest().authenticated()
             )
 
-            // ✅ GOOGLE LOGIN WITH JWT RESPONSE
+            // ✅ GOOGLE LOGIN
             .oauth2Login(oauth -> oauth
-                .successHandler(successHandler)   // 🔥 IMPORTANT CHANGE
+                .successHandler(successHandler)
             )
 
+            // ✅ JWT FILTER (after OAuth config)
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 
+            // ✅ H2 console fix
             .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();

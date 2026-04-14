@@ -18,5 +18,9 @@ public interface IQuantityMeasurementService {
     
     List<QuantityMeasurementEntity> getHistory(String operation, String email);
 
+    List<QuantityMeasurementEntity> getAllHistory(String email);
+
+    List<QuantityMeasurementEntity> getErroredHistory(String email);
+
     long getCount(String operation, String email);
 }
